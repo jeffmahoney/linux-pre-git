@@ -1,6 +1,6 @@
 *.[oas]
 *.ko
-*.ver.c
+*.mod.c
 .*.cmd
 .*.d
 .config
@@ -97,3 +97,8 @@ lib/crc32table.h
 lib/gen_crc32table
 vmlinux
 scripts/kconfig/mconf
+scripts/mk_elfconfig
+scripts/mk_elfconfig.h
+scripts/modpost
+drivers/ieee1394/oui.c
+scripts/elfconfig.h
