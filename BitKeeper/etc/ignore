@@ -1,5 +1,6 @@
 *.[oas]
 *.ko
+*.ver.c
 .*.cmd
 .*.d
 .config
