@@ -85,4 +85,12 @@ scripts/lxdialog/lxdialog
 scripts/mkdep
 scripts/split-include
 scripts/tkparse
+scripts/kconfig/conf
+scripts/kconfig/lex.zconf.c
+scripts/kconfig/libkconfig.so
+scripts/kconfig/lkc_defs.h
+scripts/kconfig/zconf.tab.c
+scripts/kconfig/zconf.tab.h
+usr/gen_init_cpio
+usr/initramfs_data.cpio.gz
 vmlinux
