@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# This is running in the RESYNC tree, we're looking for any new
+# triggers and/or changes to triggers.
+# Done after the resolve stage because they could be sneaky and create
+# the file in an earlier changeset and then move it.
+
+test `bk sfiles BitKeeper/triggers | wc -l` -gt 0 && {
+    echo SECURITY WARNING: Triggers have been added/modified
+    echo Changes delayed until they are reviewed
+    exit 3
+}
+exit 0
+
