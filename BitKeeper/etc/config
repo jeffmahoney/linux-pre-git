@@ -1,3 +1,4 @@
+# Don't change this unless you're Linus
 logging_ask:no
 description: Linux kernel tree
 logging: logging@openlogging.org
