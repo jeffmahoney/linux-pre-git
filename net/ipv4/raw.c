@@ -227,12 +227,11 @@ static int raw_rcv_skb(struct sock * sk, struct sk_buff * skb)
 	/* Charge it to the socket. */
 	
 	if (sock_queue_rcv_skb(sk, skb) < 0) {
-		IP_INC_STATS(IpInDiscards);
+		/* FIXME: increment a raw drops counter here */
 		kfree_skb(skb);
 		return NET_RX_DROP;
 	}
 
-	IP_INC_STATS(IpInDelivers);
 	return NET_RX_SUCCESS;
 }
 
@@ -420,11 +419,12 @@ static int raw_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	}
 
 	{
-		struct flowi fl = { .nl_u = { .ip4_u =
+		struct flowi fl = { .oif = ipc.oif,
+				    .nl_u = { .ip4_u =
 					      { .daddr = daddr,
 						.saddr = saddr,
 						.tos = tos } },
-				    .oif = ipc.oif };
+				    .proto = IPPROTO_RAW };
 		err = ip_route_output_key(&rt, &fl);
 	}
 	if (err)
