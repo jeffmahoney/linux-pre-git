@@ -1,10 +1,12 @@
 *.[oas]
 .*.cmd
+.*.d
 .config
 .config.old
 .depend
 .hdepend
 .version
+.tmp_export-objs
 BitKeeper/*/*
 Desktop.ini
 PENDING/*
@@ -41,8 +43,7 @@ include/linux/version.h
 include/linux/modules/*
 scripts/kconfig.tk
 scripts/lxdialog/lxdialog
-scripts/mkdep
+scripts/fixdep
 scripts/split-include
 scripts/tkparse
 vmlinux
-drivers/ide/.piix.c.swp
