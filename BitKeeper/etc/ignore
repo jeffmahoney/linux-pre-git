@@ -59,3 +59,11 @@ scripts/mkdep
 scripts/split-include
 scripts/tkparse
 vmlinux
+arch/i386/boot/compressed/vmlinux.bin.gz
+fs/reiserfs/Makefile~
+fs/reiserfs/do_balan.c~
+fs/reiserfs/fix_node.c~
+fs/reiserfs/ibalance.c~
+fs/reiserfs/stree.c~
+fs/reiserfs/super.c~
+include/linux/reiserfs_fs.h~
