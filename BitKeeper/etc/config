@@ -1,0 +1,4 @@
+logging_ask:no
+description: Linux kernel tree
+logging: logging@openlogging.org
+email: torvalds@transmeta.com
