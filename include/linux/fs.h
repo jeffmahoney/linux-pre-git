@@ -622,6 +622,18 @@ extern spinlock_t files_lock;
  */
 typedef struct files_struct *fl_owner_t;
 
+struct file_lock_operations {
+	void (*fl_insert)(struct file_lock *);	/* lock insertion callback */
+	void (*fl_remove)(struct file_lock *);	/* lock removal callback */
+	void (*fl_copy_lock)(struct file_lock *, struct file_lock *);
+	void (*fl_release_private)(struct file_lock *);
+};
+
+struct lock_manager_operations {
+	int (*fl_compare_owner)(struct file_lock *, struct file_lock *);
+	void (*fl_notify)(struct file_lock *);	/* unblock callback */
+};
+
 /* that will die - we need it for nfs_lock_info */
 #include <linux/nfs_fs_i.h>
 
@@ -638,13 +650,11 @@ struct file_lock {
 	loff_t fl_start;
 	loff_t fl_end;
 
-	void (*fl_notify)(struct file_lock *);	/* unblock callback */
-	void (*fl_insert)(struct file_lock *);	/* lock insertion callback */
-	void (*fl_remove)(struct file_lock *);	/* lock removal callback */
-
 	struct fasync_struct *	fl_fasync; /* for lease break notifications */
 	unsigned long fl_break_time;	/* for nonblocking lease breaks */
 
+	struct file_lock_operations *fl_ops;	/* Callbacks for filesystems */
+	struct lock_manager_operations *fl_lmops;	/* Callbacks for lockmanagers */
 	union {
 		struct nfs_lock_info	nfs_fl;
 	} fl_u;
@@ -680,6 +690,7 @@ extern void locks_remove_posix(struct file *, fl_owner_t);
 extern void locks_remove_flock(struct file *);
 extern struct file_lock *posix_test_lock(struct file *, struct file_lock *);
 extern int posix_lock_file(struct file *, struct file_lock *);
+extern int posix_lock_file_wait(struct file *, struct file_lock *);
 extern void posix_block_lock(struct file_lock *, struct file_lock *);
 extern void posix_unblock_lock(struct file *, struct file_lock *);
 extern int posix_locks_deadlock(struct file_lock *, struct file_lock *);
@@ -805,6 +816,11 @@ extern int vfs_link(struct dentry *, struct inode *, struct dentry *);
 extern int vfs_rmdir(struct inode *, struct dentry *);
 extern int vfs_unlink(struct inode *, struct dentry *);
 extern int vfs_rename(struct inode *, struct dentry *, struct inode *, struct dentry *);
+
+/*
+ * VFS dentry helper functions.
+ */
+extern void dentry_unhash(struct dentry *dentry);
 
 /*
  * File types

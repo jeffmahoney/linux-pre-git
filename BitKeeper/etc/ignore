@@ -9,7 +9,6 @@
 .depend
 .hdepend
 .tmp*
-.tmp_export-objs
 .version
 BitKeeper/*/*
 Desktop.ini
@@ -111,7 +110,6 @@ arch/i386/boot/zImage
 arch/i386/kernel/vsyscall-int80.so
 arch/i386/kernel/vsyscall-sysenter.so
 arch/ia64/kernel/traps.c.orig
-arch/ia64/pci/pci.c.rej
 arch/ppc64/boot/kernel-.config.c
 arch/ppc64/boot/kernel-.config.gz
 arch/ppc64/boot/kernel-System.map.c
@@ -134,7 +132,6 @@ drivers/char/consolemap_deftbl.c
 drivers/char/defkeymap.c
 drivers/char/qtronixmap.c
 drivers/eisa/devlist.h
-drivers/ide/.piix.c.swp
 drivers/ieee1394/oui.c
 drivers/md/mktables
 drivers/md/raid6int1.c
@@ -193,12 +190,6 @@ drivers/video/logo/logo_superh_vga16.c
 drivers/video/riva/accel.c
 fs/.aio.c.swp
 fs/aio.c.orig
-fs/reiserfs/Makefile~
-fs/reiserfs/do_balan.c~
-fs/reiserfs/fix_node.c~
-fs/reiserfs/ibalance.c~
-fs/reiserfs/stree.c~
-fs/reiserfs/super.c~
 include/asm
 include/asm-alpha/asm_offsets.h
 include/asm-arm/.arch
@@ -206,14 +197,11 @@ include/asm-arm/arch
 include/asm-arm/constants.h
 include/asm-arm/mach-types.h
 include/asm-i386/asm_offsets.h
-include/asm-ia64/mc146818rtc.h~
 include/config/*
-include/linux/#mm.h#
 include/linux/autoconf.h
 include/linux/compile.h
 include/linux/modules/*
 include/linux/modversions.h
-include/linux/reiserfs_fs.h~
 include/linux/version.h
 kernel.spec
 kernel/config_data.gz
@@ -267,3 +255,4 @@ usr/initramfs_data.S
 usr/initramfs_data.cpio
 usr/initramfs_data.cpio.gz
 vmlinux
+arch/*/kernel/vmlinux.lds

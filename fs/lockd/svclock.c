@@ -42,7 +42,6 @@
 static void	nlmsvc_insert_block(struct nlm_block *block, unsigned long);
 static int	nlmsvc_remove_block(struct nlm_block *block);
 static void	nlmsvc_grant_callback(struct rpc_task *task);
-static void	nlmsvc_notify_blocked(struct file_lock *);
 
 /*
  * The list of blocked locks to retry
@@ -193,7 +192,7 @@ nlmsvc_create_block(struct svc_rqst *rqstp, struct nlm_file *file,
 		goto failed_free;
 
 	/* Set notifier function for VFS, and init args */
-	block->b_call.a_args.lock.fl.fl_notify = nlmsvc_notify_blocked;
+	block->b_call.a_args.lock.fl.fl_lmops = &nlmsvc_lock_operations;
 	block->b_call.a_args.cookie = *cookie;	/* see above */
 
 	dprintk("lockd: created block %p...\n", block);
@@ -483,6 +482,16 @@ nlmsvc_notify_blocked(struct file_lock *fl)
 
 	printk(KERN_WARNING "lockd: notification for unknown block!\n");
 }
+
+static int nlmsvc_same_owner(struct file_lock *fl1, struct file_lock *fl2)
+{
+	return fl1->fl_owner == fl2->fl_owner && fl1->fl_pid == fl2->fl_pid;
+}
+
+struct lock_manager_operations nlmsvc_lock_operations = {
+	.fl_compare_owner = nlmsvc_same_owner,
+	.fl_notify = nlmsvc_notify_blocked,
+};
 
 /*
  * Try to claim a lock that was previously blocked.
