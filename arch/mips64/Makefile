@@ -12,7 +12,6 @@
 #
 # Select the object file format to substitute into the linker script.
 #
-CPP=$(CC) -E
 ifdef CONFIG_CPU_LITTLE_ENDIAN
 tool-prefix	= mips64el-linux-
 else
@@ -118,7 +117,7 @@ endif
 #
 ifdef CONFIG_BOOT_ELF32
 CFLAGS += -Wa,-32
-LDFLAGS_vmlinux += -T arch/mips64/ld.script.elf32
+LDFLAGS_vmlinux += -T arch/mips64/vmlinux.lds.s
 endif
 #
 # The 64-bit ELF tools are pretty broken so at this time we generate 64-bit
@@ -126,7 +125,7 @@ endif
 #
 ifdef CONFIG_BOOT_ELF64
 CFLAGS += -Wa,-32
-LDFLAGS_vmlinux += -T arch/mips64/ld.script.elf32
+LDFLAGS_vmlinux += -T arch/mips64/vmlinux.lds.s
 #AS += -64
 #LDFLAGS += -m elf64bmip
 #LDFLAGS_vmlinux += -T arch/mips64/ld.script.elf64
@@ -148,9 +147,9 @@ else
 64bit-bfd = elf64-bigmips
 endif
 
-vmlinux: arch/mips64/ld.script.elf32
-arch/mips64/ld.script.elf32: arch/mips64/ld.script.elf32.S
-	$(CPP) -C -P -I$(HPATH) -imacros $(HPATH)/asm-mips64/sn/mapped_kernel.h -Umips arch/mips64/ld.script.elf32.S > arch/mips64/ld.script.elf32
+vmlinux: arch/mips64/vmlinux.lds.s
+
+CPPFLAGS_arch/mips64/vmlinux.lds.s := -imacros $(srctree)/include/asm-mips64/sn/mapped_kernel.h
 
 ifdef CONFIG_MAPPED_KERNEL
 vmlinux.64: vmlinux
@@ -171,7 +170,6 @@ zdisk: vmlinux
 archclean:
 	@$(MAKEBOOT) clean
 	$(MAKE) -C arch/$(ARCH)/tools clean
-	rm -f vmlinux.64 arch/$(ARCH)/ld.script.elf32
 
 archmrproper:
 	@$(MAKEBOOT) mrproper

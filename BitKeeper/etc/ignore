@@ -77,3 +77,4 @@ scripts/tkparse
 scripts/docproc
 vmlinux
 include/linux/#mm.h#
+scripts/conmakehash
