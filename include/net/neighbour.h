@@ -51,7 +51,7 @@
 #include <linux/err.h>
 #include <linux/sysctl.h>
 
-#define NUD_IN_TIMER	(NUD_INCOMPLETE|NUD_DELAY|NUD_PROBE)
+#define NUD_IN_TIMER	(NUD_INCOMPLETE|NUD_REACHABLE|NUD_DELAY|NUD_PROBE)
 #define NUD_VALID	(NUD_PERMANENT|NUD_NOARP|NUD_REACHABLE|NUD_PROBE|NUD_STALE|NUD_DELAY)
 #define NUD_CONNECTED	(NUD_PERMANENT|NUD_NOARP|NUD_REACHABLE)
 
@@ -179,6 +179,13 @@ struct neigh_table
 	struct pneigh_entry	*phash_buckets[PNEIGH_HASHMASK+1];
 };
 
+/* flags for neigh_update() */
+#define NEIGH_UPDATE_F_OVERRIDE			0x00000001
+#define NEIGH_UPDATE_F_WEAK_OVERRIDE		0x00000002
+#define NEIGH_UPDATE_F_OVERRIDE_ISROUTER	0x00000004
+#define NEIGH_UPDATE_F_ISROUTER			0x40000000
+#define NEIGH_UPDATE_F_ADMIN			0x80000000
+
 extern void			neigh_table_init(struct neigh_table *tbl);
 extern int			neigh_table_clear(struct neigh_table *tbl);
 extern struct neighbour *	neigh_lookup(struct neigh_table *tbl,
@@ -189,7 +196,8 @@ extern struct neighbour *	neigh_create(struct neigh_table *tbl,
 					     struct net_device *dev);
 extern void			neigh_destroy(struct neighbour *neigh);
 extern int			__neigh_event_send(struct neighbour *neigh, struct sk_buff *skb);
-extern int			neigh_update(struct neighbour *neigh, const u8 *lladdr, u8 new, int override, int arp);
+extern int			neigh_update(struct neighbour *neigh, const u8 *lladdr, u8 new, 
+					     u32 flags);
 extern void			neigh_changeaddr(struct neigh_table *tbl, struct net_device *dev);
 extern int			neigh_ifdown(struct neigh_table *tbl, struct net_device *dev);
 extern int			neigh_resolve_output(struct sk_buff *skb);
