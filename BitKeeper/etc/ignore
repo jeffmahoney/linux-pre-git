@@ -265,3 +265,4 @@ usr/initramfs_data.cpio
 usr/initramfs_data.cpio.gz
 usr/initramfs_list
 vmlinux
+scripts/kconfig/gconf
