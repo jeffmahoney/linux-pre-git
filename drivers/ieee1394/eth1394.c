@@ -400,9 +400,7 @@ static int ether1394_init_dev (struct net_device *dev)
 	/* Some constants */
 	dev->watchdog_timeo	= ETHER1394_TIMEOUT;
 	dev->flags		= IFF_BROADCAST | IFF_MULTICAST;
-        /* !! If data corruption or untrackable kernel panics occur, try
-         * removing NETIF_F_FRAGLIST !! */
-	dev->features		= NETIF_F_HIGHDMA | NETIF_F_FRAGLIST;
+	dev->features		= NETIF_F_HIGHDMA;
 	dev->addr_len		= ETH1394_ALEN;
 	dev->hard_header_len 	= ETH1394_HLEN;
 	dev->type		= ARPHRD_IEEE1394;
