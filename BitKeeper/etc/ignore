@@ -34,6 +34,16 @@ arch/i386/boot/vmlinux.bin
 arch/i386/boot/zImage
 arch/ia64/kernel/traps.c.orig
 arch/ia64/pci/pci.c.rej
+arch/ppc64/boot/kernel-.config.c
+arch/ppc64/boot/kernel-.config.gz
+arch/ppc64/boot/kernel-System.map.c
+arch/ppc64/boot/kernel-System.map.gz
+arch/ppc64/boot/kernel-initrd.c
+arch/ppc64/boot/kernel-initrd.gz
+arch/ppc64/boot/kernel-vmlinux.c
+arch/ppc64/boot/kernel-vmlinux.gz
+arch/ppc64/boot/ramdisk.image.gz
+arch/ppc64/boot/zImage.initrd
 drivers/char/conmakehash
 drivers/char/consolemap_deftbl.c
 drivers/char/defkeymap.c
