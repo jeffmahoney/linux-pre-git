@@ -132,3 +132,4 @@ push-all
 drivers/video/logo/logo_linux_clut224.c
 tags
 arch/i386/boot/mtools.conf
+drivers/scsi/aic7xxx/aic7xxx_reg_print.c
