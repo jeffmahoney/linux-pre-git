@@ -1115,8 +1115,10 @@ static int pnp_get_info(char *buffer, char **start,
 				       "nameserver %u.%u.%u.%u\n",
 				       NIPQUAD(ic_nameservers[i]));
 	}
-	len += sprintf(buffer + len, "bootserver %u.%u.%u.%u\n",
-			NIPQUAD(ic_servaddr));
+	if (ic_servaddr != INADDR_NONE)
+		len += sprintf(buffer + len,
+			       "bootserver %u.%u.%u.%u\n",
+			       NIPQUAD(ic_servaddr));
 
 	if (offset > len)
 		offset = len;
