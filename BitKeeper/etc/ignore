@@ -257,3 +257,4 @@ usr/initramfs_data.cpio.gz
 vmlinux
 arch/*/kernel/vmlinux.lds
 arch/i386/kernel/vsyscall.lds
+usr/initramfs_list
