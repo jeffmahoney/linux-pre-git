@@ -3601,7 +3601,7 @@ mptscsih_bios_param(Disk * disk, kdev_t dev, int *ip)
  */
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,44)
 int
-mptscsih_slave_attach(Scsi_Device *device)
+mptscsih_slave_configure(Scsi_Device *device)
 {
 	struct Scsi_Host	*host = device->host;
 	VirtDevice		*pTarget;
