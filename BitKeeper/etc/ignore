@@ -22,7 +22,8 @@ arch/i386/boot/compressed/bvmlinux.out
 arch/i386/boot/tools/build
 drivers/char/conmakehash
 drivers/char/consolemap_deftbl.c
-drivers/ide/.piix.c.swp
+drivers/char/defkeymap.c
+drivers/char/qtronixmap.c
 drivers/net/hamradio/soundmodem/gentbl
 drivers/net/hamradio/soundmodem/sm_tbl_afsk1200.h
 drivers/net/hamradio/soundmodem/sm_tbl_afsk2400_7.h
@@ -34,7 +35,12 @@ drivers/net/hamradio/soundmodem/sm_tbl_psk4800.h
 drivers/pci/classlist.h
 drivers/pci/devlist.h
 drivers/pci/gen-devlist
-drivers/video/Config.in.orig
+drivers/scsi/53c700_d.h
+drivers/scsi/sim710_d.h
+drivers/scsi/53c7xx_d.h
+drivers/scsi/53c7xx_u.h
+drivers/scsi/53c8xx_d.h
+drivers/scsi/53c8xx_u.h
 include/asm
 include/asm-alpha/asm_offsets.h
 include/config/*
