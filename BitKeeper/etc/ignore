@@ -240,3 +240,4 @@ drivers/scsi/aic7xxx/aicasm/aicasm_macro_gram.h
 drivers/scsi/aic7xxx/aicasm/aicasm_macro_scan.c
 drivers/scsi/aic7xxx/aicasm/aicasm_scan.c
 drivers/scsi/aic7xxx/aicasm/aicdb.h
+fs/xfs/linux-2.6
