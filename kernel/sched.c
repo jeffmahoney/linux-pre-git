@@ -3366,25 +3366,8 @@ static int get_user_cpu_mask(unsigned long __user *user_mask_ptr, unsigned len,
 			     cpumask_t *new_mask)
 {
 	if (len < sizeof(cpumask_t)) {
-		/* Smaller is ok as long as all online CPUs are covered */
-		int i, max = 0;
-		for_each_online_cpu(i)
-			max = i;
-		if (len < (max + 7)/8)
-			return -EINVAL;
 		memset(new_mask, 0, sizeof(cpumask_t));
 	} else if (len > sizeof(cpumask_t)) {
-		/* Longer is ok as long as all high bits are 0 */
-		int i;
-		if (len > PAGE_SIZE)
-			return -EINVAL;
-		for (i = sizeof(cpumask_t); i < len; i++) {
-			unsigned char val;
-			if (get_user(val, (unsigned char *)user_mask_ptr + i))
-				return -EFAULT;
-			if (val)
-				return -EINVAL;
-		}
 		len = sizeof(cpumask_t);
 	}
 	return copy_from_user(new_mask, user_mask_ptr, len) ? -EFAULT : 0;
@@ -4468,7 +4451,11 @@ __init static void arch_init_sched_domains(void)
 		sd = &per_cpu(phys_domains, i);
 		group = cpu_to_phys_group(i);
 		*sd = SD_CPU_INIT;
+#ifdef CONFIG_NUMA
 		sd->span = nodemask;
+#else
+		sd->span = cpu_possible_map;
+#endif
 		sd->parent = p;
 		sd->groups = &sched_group_phys[group];
 
@@ -4506,6 +4493,7 @@ __init static void arch_init_sched_domains(void)
 						&cpu_to_isolated_group);
 	}
 
+#ifdef CONFIG_NUMA
 	/* Set up physical groups */
 	for (i = 0; i < MAX_NUMNODES; i++) {
 		cpumask_t nodemask = node_to_cpumask(i);
@@ -4517,6 +4505,10 @@ __init static void arch_init_sched_domains(void)
 		init_sched_build_groups(sched_group_phys, nodemask,
 						&cpu_to_phys_group);
 	}
+#else
+	init_sched_build_groups(sched_group_phys, cpu_possible_map,
+							&cpu_to_phys_group);
+#endif
 
 #ifdef CONFIG_NUMA
 	/* Set up node groups */
