@@ -479,6 +479,14 @@ static struct pcnet32_access pcnet32_dwio = {
     .reset	= pcnet32_dwio_reset
 };
 
+#ifdef CONFIG_NET_POLL_CONTROLLER
+static void pcnet32_poll_controller(struct net_device *dev)
+{ 
+	disable_irq(dev->irq);
+	pcnet32_interrupt(0, dev, NULL);
+	enable_irq(dev->irq);
+} 
+#endif
 
 
 static int pcnet32_get_settings(struct net_device *dev, struct ethtool_cmd *cmd)
@@ -1105,6 +1113,10 @@ pcnet32_probe1(unsigned long ioaddr, unsigned int irq_line, int shared,
     dev->ethtool_ops = &pcnet32_ethtool_ops;
     dev->tx_timeout = pcnet32_tx_timeout;
     dev->watchdog_timeo = (5*HZ);
+
+#ifdef CONFIG_NET_POLL_CONTROLLER
+    dev->poll_controller = pcnet32_poll_controller;
+#endif    
 
     /* Fill in the generic fields of the device structure. */
     if (register_netdev(dev))
