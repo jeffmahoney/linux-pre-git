@@ -1,6 +1,8 @@
 #ifndef _LINUX_SISFB
 #define _LINUX_SISFB
 
+#include <linux/spinlock.h>
+
 #include <asm/ioctl.h>
 #include <asm/types.h>
 
@@ -32,14 +34,19 @@ typedef enum _SIS_CHIP_TYPE {
 	SIS_730, 
 	SIS_315H,
 	SIS_315,
-	SIS_550,
 	SIS_315PRO,
-	SIS_640,
-	SIS_740,
+	SIS_550,
 	SIS_650,
+	SIS_740,
 	SIS_330,
 	MAX_SIS_CHIP
 } SIS_CHIP_TYPE;
+
+typedef enum _VGA_ENGINE {
+	UNKNOWN_VGA = 0,
+	SIS_300_VGA,
+	SIS_315_VGA,
+} VGA_ENGINE;
 
 typedef enum _TVTYPE {
 	TVMODE_NTSC = 0,
@@ -86,23 +93,25 @@ struct ap_data {
 };
 
 struct video_info {
-	int    chip_id;
+	int           chip_id;
 	unsigned int  video_size;
 	unsigned long video_base;
-	char  *video_vbase;
+	char  *       video_vbase;
 	unsigned long mmio_base;
-	char  *mmio_vbase; 
+	char  *       mmio_vbase;
 	unsigned long vga_base;
 	unsigned long mtrr;
 	unsigned long heapstart;
 
 	int    video_bpp;
+	int    video_cmap_len;
 	int    video_width;
 	int    video_height;
 	int    video_vwidth;
 	int    video_vheight;
 	int    org_x;
 	int    org_y;
+	int    video_linelength;
 	unsigned int refresh_rate;
 
 	unsigned long disp_state;
@@ -113,7 +122,22 @@ struct video_info {
 	SIS_CHIP_TYPE chip;
 	unsigned char revision_id;
 
-	char reserved[256];
+        unsigned short DstColor;		/* TW: For 2d acceleration */
+	unsigned long  SiS310_AccelDepth;
+	unsigned long  CommandReg;
+
+	spinlock_t     lockaccel;
+
+        unsigned int   pcibus;
+	unsigned int   pcislot;
+	unsigned int   pcifunc;
+
+	int 	       accel;
+
+	unsigned short subsysvendor;
+	unsigned short subsysdevice;
+
+	char reserved[236];
 };
 
 
@@ -121,7 +145,9 @@ struct video_info {
 /*     If changing this, vgatypes.h must also be changed (for X driver)    */
 
 /* TW: ioctl for identifying and giving some info (esp. memory heap start) */
-#define SISFB_GET_INFO	  _IOR('n',0xF8,sizeof(__u32))
+#define SISFB_GET_INFO	  	_IOR('n',0xF8,sizeof(__u32))
+
+#define SISFB_GET_VBRSTATUS  	_IOR('n',0xF9,sizeof(__u32))
 
 /* TW: Structure argument for SISFB_GET_INFO ioctl  */
 typedef struct _SISFB_INFO sisfb_info, *psisfb_info;
@@ -140,7 +166,19 @@ struct _SISFB_INFO {
 	unsigned char sisfb_revision;
 	unsigned char sisfb_patchlevel;
 
-	char reserved[253]; 		/* for future use */
+	unsigned char sisfb_caps;	/* Sisfb capabilities */
+
+	int    sisfb_tqlen;		/* turbo queue length (in KB) */
+
+	unsigned int sisfb_pcibus;      /* The card's PCI ID */
+	unsigned int sisfb_pcislot;
+	unsigned int sisfb_pcifunc;
+
+	unsigned char sisfb_lcdpdc;	/* PanelDelayCompensation */
+	
+	unsigned char sisfb_lcda;	/* Detected status of LCDA for low res/text modes */
+
+	char reserved[235]; 		/* for future use */
 };
 
 #ifdef __KERNEL__
