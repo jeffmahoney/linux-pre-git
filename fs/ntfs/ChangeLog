@@ -21,6 +21,20 @@ ToDo/Notes:
 	- Enable the code for setting the NT4 compatibility flag when we start
 	  making NTFS 1.2 specific modifications.
 
+2.1.19-WIP
+
+	- Update ->setattr (fs/ntfs/inode.c::ntfs_setattr()) to refuse to
+	  change the uid, gid, and mode of an inode as we do not support NTFS
+	  ACLs yet.
+	- Remove BKL use from ntfs_setattr() syncing up with the rest of the
+	  kernel.
+	- Get rid of the ugly transparent union in fs/ntfs/dir.c::ntfs_readdir()
+	  and ntfs_filldir() as per suggestion from Al Viro.
+	- Change '\0' and L'\0' to simply 0 as per advice from Linus Torvalds.
+	- Update ->truncate (fs/ntfs/inode.c::ntfs_truncate()) to check if the
+	  inode size has changed and to only output an error if so.
+	- Rename fs/ntfs/attrib.h::attribute_value_length() to ntfs_attr_size().
+
 2.1.18 - Fix scheduling latencies at mount time as well as an endianness bug.
 
 	- Remove vol->nr_mft_records as it was pretty meaningless and optimize
