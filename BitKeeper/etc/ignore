@@ -47,6 +47,7 @@ arch/ppc64/boot/kernel-vmlinux.c
 arch/ppc64/boot/kernel-vmlinux.gz
 arch/ppc64/boot/ramdisk.image.gz
 arch/ppc64/boot/zImage.initrd
+cscope.out
 cscope/csdb
 cscope/files
 cscope/hdirs

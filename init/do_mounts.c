@@ -273,6 +273,9 @@ retry:
 		printk("VFS: Cannot open root device \"%s\" or %s\n",
 				root_device_name, b);
 		printk("Please append a correct \"root=\" boot option\n");
+
+		mount_root_failed_msg();	/* architecture dependent */
+
 		panic("VFS: Unable to mount root fs on %s", b);
 	}
 	panic("VFS: Unable to mount root fs on %s", __bdevname(ROOT_DEV, b));
