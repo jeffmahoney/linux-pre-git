@@ -1365,12 +1365,12 @@ static int fd_mcs_device_reset(Scsi_Cmnd * SCpnt) {
 		return SUCCESS;
 	}
 
-#include "sd.h"
 #include <scsi/scsi_ioctl.h>
 
-	static int fd_mcs_biosparam(Scsi_Disk * disk, struct block_device *bdev, int *info_array) {
+	static int fd_mcs_biosparam(Scsi_Disk * disk, struct block_device *bdev,
+				    sector_t capacity, int *info_array) {
 		unsigned char buf[512 + sizeof(int) * 2];
-		int size = disk->capacity;
+		int size = capacity;
 		int *sizes = (int *) buf;
 		unsigned char *data = (unsigned char *) (sizes + 2);
 		unsigned char do_read[] = { READ_6, 0, 0, 0, 1, 0 };
@@ -1437,10 +1437,6 @@ static int fd_mcs_device_reset(Scsi_Cmnd * SCpnt) {
 		}
 		/* For both methods, compute the cylinders */
 		info_array[2] = (unsigned int) size / (info_array[0] * info_array[1]);
-
-
-		return 0;
-	}
 
 /* Eventually this will go into an include file, but this will be later */
 	static Scsi_Host_Template driver_template = FD_MCS;

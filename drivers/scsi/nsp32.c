@@ -352,7 +352,6 @@ static Scsi_Host_Template driver_template = {
 	.eh_device_reset_handler =	NULL,
 	.eh_bus_reset_handler =		nsp32_eh_bus_reset,
 	.eh_host_reset_handler =	nsp32_eh_host_reset,
-	.reset =			nsp32_reset,
 	.release =			nsp32_release,
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,5,2))
 	.use_new_eh_code =        	1,

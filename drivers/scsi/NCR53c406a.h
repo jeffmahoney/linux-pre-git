@@ -47,13 +47,12 @@
 
 static int NCR53c406a_detect(Scsi_Host_Template *);
 static const char *NCR53c406a_info(struct Scsi_Host *);
-
 static int NCR53c406a_command(Scsi_Cmnd *);
 static int NCR53c406a_queue(Scsi_Cmnd *, void (*done) (Scsi_Cmnd *));
 static int NCR53c406a_abort(Scsi_Cmnd *);
 static int NCR53c406a_bus_reset(Scsi_Cmnd *);
 static int NCR53c406a_device_reset(Scsi_Cmnd *);
 static int NCR53c406a_host_reset(Scsi_Cmnd *);
-static int NCR53c406a_biosparm(Disk *, struct block_device *, int[]);
+static int NCR53c406a_biosparm(Disk *, struct block_device *, sector_t, int[]);
 
 #endif				/* _NCR53C406A_H */

@@ -736,6 +736,94 @@ struct Scsi_Device_Template *scsi_get_request_dev(struct request *req)
 }
 
 /*
+ * Function:    scsi_init_io()
+ *
+ * Purpose:     SCSI I/O initialize function.
+ *
+ * Arguments:   SCpnt   - Command descriptor we wish to initialize
+ *
+ * Returns:     1 on success.
+ */
+static int scsi_init_io(Scsi_Cmnd *SCpnt)
+{
+	struct request     *req = SCpnt->request;
+	struct scatterlist *sgpnt;
+	int count, gfp_mask;
+
+	/*
+	 * non-sg block request. FIXME: check bouncing for isa hosts!
+	 */
+	if ((req->flags & REQ_BLOCK_PC) && !req->bio) {
+		/*
+		 * FIXME: isa bouncing
+		 */
+		if (SCpnt->host->unchecked_isa_dma)
+			goto fail;
+
+		SCpnt->request_bufflen = req->data_len;
+		SCpnt->request_buffer = req->data;
+		req->buffer = req->data;
+		SCpnt->use_sg = 0;
+		return 1;
+	}
+
+	/*
+	 * we used to not use scatter-gather for single segment request,
+	 * but now we do (it makes highmem I/O easier to support without
+	 * kmapping pages)
+	 */
+	SCpnt->use_sg = req->nr_phys_segments;
+
+	gfp_mask = GFP_NOIO;
+	if (in_interrupt()) {
+		gfp_mask &= ~__GFP_WAIT;
+		gfp_mask |= __GFP_HIGH;
+	}
+
+	/*
+	 * if sg table allocation fails, requeue request later.
+	 */
+	sgpnt = scsi_alloc_sgtable(SCpnt, gfp_mask);
+	if (unlikely(!sgpnt))
+		goto out;
+
+	SCpnt->request_buffer = (char *) sgpnt;
+	SCpnt->request_bufflen = req->nr_sectors << 9;
+	if (blk_pc_request(req))
+		SCpnt->request_bufflen = req->data_len;
+	req->buffer = NULL;
+
+	/* 
+	 * Next, walk the list, and fill in the addresses and sizes of
+	 * each segment.
+	 */
+	count = blk_rq_map_sg(req->q, req, SCpnt->request_buffer);
+
+	/*
+	 * mapped well, send it off
+	 */
+	if (unlikely(count > SCpnt->use_sg))
+		goto incorrect;
+	SCpnt->use_sg = count;
+	return 1;
+
+incorrect:
+	printk(KERN_ERR "Incorrect number of segments after building list\n");
+	printk(KERN_ERR "counted %d, received %d\n", count, SCpnt->use_sg);
+	printk(KERN_ERR "req nr_sec %lu, cur_nr_sec %u\n", req->nr_sectors,
+			req->current_nr_sectors);
+
+	/*
+	 * kill it. there should be no leftover blocks in this request
+	 */
+fail:
+	SCpnt = scsi_end_request(SCpnt, 0, req->nr_sectors);
+	BUG_ON(SCpnt);
+out:
+	return 0;
+}
+
+/*
  * Function:    scsi_request_fn()
  *
  * Purpose:     Generic version of request function for SCSI hosts.
@@ -925,7 +1013,8 @@ void scsi_request_fn(request_queue_t * q)
 		req = NULL;
 		spin_unlock_irq(q->queue_lock);
 
-		if (SCpnt->request->flags & (REQ_CMD | REQ_BLOCK_PC)) {
+		if (!(SCpnt->request->flags & REQ_DONTPREP)
+		    && (SCpnt->request->flags & (REQ_CMD | REQ_BLOCK_PC))) {
 			/*
 			 * This will do a couple of things:
 			 *  1) Fill in the actual SCSI command.
@@ -946,18 +1035,8 @@ void scsi_request_fn(request_queue_t * q)
 			 * required).
 			 */
 			if (!scsi_init_io(SCpnt)) {
+				scsi_mlqueue_insert(SCpnt, SCSI_MLQUEUE_DEVICE_BUSY);
 				spin_lock_irq(q->queue_lock);
-				SHpnt->host_busy--;
-				SDpnt->device_busy--;
-				if (SDpnt->device_busy == 0) {
-					SDpnt->starved = 1;
-					SHpnt->some_device_starved = 1;
-				}
-				SCpnt->request->special = SCpnt;
-				SCpnt->request->flags |= REQ_SPECIAL;
-				if(blk_rq_tagged(SCpnt->request))
-					blk_queue_end_tag(q, SCpnt->request);
-				__elv_add_request(q, SCpnt->request, 0, 0);
 				break;
 			}
 
@@ -978,6 +1057,7 @@ void scsi_request_fn(request_queue_t * q)
 				continue;
 			}
 		}
+		SCpnt->request->flags |= REQ_DONTPREP;
 		/*
 		 * Finally, initialize any error handling parameters, and set up
 		 * the timers for timeouts.

@@ -39,7 +39,8 @@ static int sym53c416_abort(Scsi_Cmnd *);
 static int sym53c416_host_reset(Scsi_Cmnd *);
 static int sym53c416_bus_reset(Scsi_Cmnd *);
 static int sym53c416_device_reset(Scsi_Cmnd *);
-static int sym53c416_bios_param(Disk *, struct block_device *, int *);
+static int sym53c416_bios_param(struct scsi_device *, struct block_device *,
+		sector_t, int *);
 static void sym53c416_setup(char *str, int *ints);
 
 #define SYM53C416 {						\

@@ -9,7 +9,8 @@ static int qlogicfas_abort(Scsi_Cmnd *);
 static int qlogicfas_bus_reset(Scsi_Cmnd *);
 static int qlogicfas_device_reset(Scsi_Cmnd *);
 static int qlogicfas_host_reset(Scsi_Cmnd *);
-static int qlogicfas_biosparam(Disk *, struct block_device *, int[]);
+static int qlogicfas_biosparam(struct scsi_device *, struct block_device *,
+			       sector_t, int[]);
 
 #define QLOGICFAS {						\
 	detect:         		qlogicfas_detect,	\
@@ -27,7 +28,6 @@ static int qlogicfas_biosparam(Disk *, struct block_device *, int[]);
 	cmd_per_lun:    1,					\
 	use_clustering: DISABLE_CLUSTERING			\
 }
-
 #endif /* _QLOGICFAS_H */
 
 
