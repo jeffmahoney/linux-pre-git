@@ -128,3 +128,4 @@ vmlinux
 arch/i386/kernel/vsyscall-int80.so
 arch/i386/kernel/vsyscall-sysenter.so
 include/asm-i386/asm_offsets.h
+push-all
