@@ -80,3 +80,5 @@ scripts/mkdep
 scripts/split-include
 scripts/tkparse
 vmlinux
+arch/ia64/kernel/traps.c.orig
+include/asm-ia64/mc146818rtc.h~
