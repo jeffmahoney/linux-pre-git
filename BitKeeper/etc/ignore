@@ -251,3 +251,16 @@ drivers/md/raid6int8.c
 drivers/md/raid6tables.c
 scripts/basic/fixdep
 scripts/basic/split-include
+drivers/video/logo/logo_superh_vga16.c
+drivers/video/logo/clut_vga16.c
+drivers/video/logo/logo_dec_clut224.c
+drivers/video/logo/logo_linux_mono.c
+drivers/video/logo/logo_linux_vga16.c
+drivers/video/logo/logo_mac_clut224.c
+drivers/video/logo/logo_parisc_clut224.c
+drivers/video/logo/logo_sgi_clut224.c
+drivers/video/logo/logo_sun_clut224.c
+drivers/video/logo/logo_superh_clut224.c
+drivers/video/logo/logo_superh_mono.c
+Module.symvers
+drivers/net/wan/wanxlfw.inc
