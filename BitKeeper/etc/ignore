@@ -6,6 +6,7 @@
 .depend
 .hdepend
 .tmp*
+.tmp_export-objs
 .version
 BitKeeper/*/*
 Desktop.ini
@@ -28,6 +29,8 @@ arch/i386/boot/setup
 arch/i386/boot/tools/build
 arch/i386/boot/vmlinux.bin
 arch/i386/boot/zImage
+arch/ia64/kernel/traps.c.orig
+arch/ia64/pci/pci.c.rej
 drivers/char/conmakehash
 drivers/char/consolemap_deftbl.c
 drivers/char/defkeymap.c
@@ -55,6 +58,8 @@ drivers/scsi/sim710_d.h
 drivers/video/.fbcon.c.swp
 drivers/video/Config.in.orig
 drivers/video/riva/accel.c
+fs/.aio.c.swp
+fs/aio.c.orig
 fs/reiserfs/Makefile~
 fs/reiserfs/do_balan.c~
 fs/reiserfs/fix_node.c~
@@ -63,6 +68,7 @@ fs/reiserfs/stree.c~
 fs/reiserfs/super.c~
 include/asm
 include/asm-alpha/asm_offsets.h
+include/asm-ia64/mc146818rtc.h~
 include/config/*
 include/linux/#mm.h#
 include/linux/autoconf.h
@@ -80,6 +86,3 @@ scripts/mkdep
 scripts/split-include
 scripts/tkparse
 vmlinux
-arch/ia64/kernel/traps.c.orig
-include/asm-ia64/mc146818rtc.h~
-arch/ia64/pci/pci.c.rej

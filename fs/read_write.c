@@ -12,6 +12,7 @@
 #include <linux/smp_lock.h>
 #include <linux/dnotify.h>
 #include <linux/security.h>
+#include <linux/module.h>
 
 #include <asm/uaccess.h>
 
@@ -176,6 +177,20 @@ bad:
 }
 #endif
 
+ssize_t do_sync_read(struct file *filp, char *buf, size_t len, loff_t *ppos)
+{
+	struct kiocb kiocb;
+	ssize_t ret;
+
+	init_sync_kiocb(&kiocb, filp);
+	kiocb.ki_pos = *ppos;
+	ret = filp->f_op->aio_read(&kiocb, buf, len, kiocb.ki_pos);
+	if (-EIOCBQUEUED == ret)
+		ret = wait_on_sync_kiocb(&kiocb);
+	*ppos = kiocb.ki_pos;
+	return ret;
+}
+
 ssize_t vfs_read(struct file *file, char *buf, size_t count, loff_t *pos)
 {
 	struct inode *inode = file->f_dentry->d_inode;
@@ -183,19 +198,36 @@ ssize_t vfs_read(struct file *file, char *buf, size_t count, loff_t *pos)
 
 	if (!(file->f_mode & FMODE_READ))
 		return -EBADF;
-	if (!file->f_op || !file->f_op->read)
+	if (!file->f_op || (!file->f_op->read && !file->f_op->aio_read))
 		return -EINVAL;
 
 	ret = locks_verify_area(FLOCK_VERIFY_READ, inode, file, *pos, count);
 	if (!ret) {
 		ret = security_ops->file_permission (file, MAY_READ);
 		if (!ret) {
-			ret = file->f_op->read(file, buf, count, pos);
+			if (file->f_op->read)
+				ret = file->f_op->read(file, buf, count, pos);
+			else
+				ret = do_sync_read(file, buf, count, pos);
 			if (ret > 0)
 				dnotify_parent(file->f_dentry, DN_ACCESS);
 		}
 	}
 
+	return ret;
+}
+
+ssize_t do_sync_write(struct file *filp, const char *buf, size_t len, loff_t *ppos)
+{
+	struct kiocb kiocb;
+	ssize_t ret;
+
+	init_sync_kiocb(&kiocb, filp);
+	kiocb.ki_pos = *ppos;
+	ret = filp->f_op->aio_write(&kiocb, buf, len, kiocb.ki_pos);
+	if (-EIOCBQUEUED == ret)
+		ret = wait_on_sync_kiocb(&kiocb);
+	*ppos = kiocb.ki_pos;
 	return ret;
 }
 
@@ -206,14 +238,17 @@ ssize_t vfs_write(struct file *file, const char *buf, size_t count, loff_t *pos)
 
 	if (!(file->f_mode & FMODE_WRITE))
 		return -EBADF;
-	if (!file->f_op || !file->f_op->write)
+	if (!file->f_op || (!file->f_op->write && !file->f_op->aio_write))
 		return -EINVAL;
 
 	ret = locks_verify_area(FLOCK_VERIFY_WRITE, inode, file, *pos, count);
 	if (!ret) {
 		ret = security_ops->file_permission (file, MAY_WRITE);
 		if (!ret) {
-			ret = file->f_op->write(file, buf, count, pos);
+			if (file->f_op->write)
+				ret = file->f_op->write(file, buf, count, pos);
+			else
+				ret = do_sync_write(file, buf, count, pos);
 			if (ret > 0)
 				dnotify_parent(file->f_dentry, DN_MODIFY);
 		}
@@ -582,3 +617,6 @@ asmlinkage ssize_t sys_sendfile64(int out_fd, int in_fd, loff_t *offset, size_t 
 
 	return do_sendfile(out_fd, in_fd, NULL, count, 0);
 }
+
+EXPORT_SYMBOL(do_sync_read);
+EXPORT_SYMBOL(do_sync_write);
