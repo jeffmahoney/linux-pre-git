@@ -138,3 +138,6 @@ usr/initramfs_data.S
 usr/initramfs_data.cpio
 usr/initramfs_data.cpio.gz
 vmlinux
+scripts/bin2c
+scripts/kconfig/qconf
+scripts/kconfig/qconf.moc
