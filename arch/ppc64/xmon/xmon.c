@@ -132,8 +132,7 @@ static void mem_map_check_slab(void);
 static void mem_map_lock_pages(void);
 static void mem_map_check_hash(void);
 static void mem_check_dup_rpn (void);
-static void show_task(struct task_struct * p);
-static void xmon_show_state(void);
+static void show_state(void);
 static void debug_trace(void);
 
 extern int print_insn_big_powerpc(FILE *, unsigned long, unsigned long);
@@ -181,6 +180,7 @@ Commands:\n\
   T	Enable/Disable PPCDBG flags\n\
   x	exit monitor\n\
   z	reboot\n\
+  Z	halt\n\
 ";
 
 static int xmon_trace[NR_CPUS];
@@ -262,8 +262,10 @@ static int find_tb_table(unsigned long codeaddr, struct tbtable *tab);
 
 static inline void disable_surveillance(void)
 {
+#ifndef CONFIG_PPC_ISERIES
         rtas_call(rtas_token("set-indicator"), 3, 1, NULL, SURVEILLANCE_TOKEN,
 		  0, 0);
+#endif
 }
 
 void
@@ -620,7 +622,12 @@ cmds(struct pt_regs *excp)
 		}
 		switch (cmd) {
 		case 'z':
+			printf("Rebooting machine now...");
 			machine_restart(NULL);
+			break;
+		case 'Z':
+			printf("Halting machine now...");
+			machine_halt();
 			break;
 		case 'm':
 			cmd = inchar();
@@ -710,7 +717,7 @@ cmds(struct pt_regs *excp)
 			printf(help_string);
 			break;
 		case 'p':
-			xmon_show_state();
+			show_state();
 			break;
 		case 'b':
 			bpt_cmds();
@@ -2797,111 +2804,6 @@ void mem_check_full_group()
 	}
 
 	printf("\nDone -------------------\n");
-}
-
-
-
-static void show_task(struct task_struct * p)
-{
-	/* unsigned long free = 0;  --Unused */
-	int state;
-	static const char * stat_nam[] = { "R", "S", "D", "Z", "T", "W" };
-
-	printf("--------------------------------------------------------------------------\n");
-	printf("%-11.11s pid: %5.5lx ppid: %5.5lx state: ", 
-	       p->comm, p->pid, p->p_pptr->pid);
-	state = p->state ? ffz(~p->state) + 1 : 0;
-	if (((unsigned) state) < sizeof(stat_nam)/sizeof(char *))
-		printf(stat_nam[state]);
-	else
-		printf(" ");
-	if (p == current)
-		printf(" pc: current task       ");
-	else
-		printf(" pc: 0x%16.16lx ", thread_saved_pc(&p->thread));
-
-	if (p->p_cptr)
-		printf("%5d ", p->p_cptr->pid);
-	else
-		printf("      ");
-	if (!p->mm)
-		printf(" (L-TLB) ");
-	else
-		printf(" (NOTLB) ");
-	if (p->p_ysptr)
-		printf("%7d", p->p_ysptr->pid);
-	else
-		printf("       ");
-	if (p->p_osptr)
-		printf(" %5d\n", p->p_osptr->pid);
-	else
-		printf("\n");
-
-	{
-		struct sigqueue *q;
-		char s[sizeof(sigset_t)*2+1], b[sizeof(sigset_t)*2+1]; 
-
-		render_sigset_t(&p->pending.signal, s);
-		render_sigset_t(&p->blocked, b);
-		printf("            sig: %d %s %s :", signal_pending(p), s, b);
-		for (q = p->pending.head; q ; q = q->next)
-			printf(" %d", q->info.si_signo);
-		printf(" X\n");
-	}
-
-	printf("            pers   : %lx  current : %lx", 
-	       p->personality, p);
-	printf("\n");
-
-	printf("            thread : 0x%16.16lx  ksp   : 0x%16.16lx\n", 
-	       &(p->thread), (p->thread.ksp));
-	printf("            pgdir : 0x%16.16lx\n", (p->thread.pgdir));
-	printf("            regs   : 0x%16.16lx  sysc  : 0x%16.16lx\n", 
-	       (p->thread.regs), (p->thread.last_syscall));
-	if(p->thread.regs) {
-	  printf("            nip    : 0x%16.16lx  msr   : 0x%16.16lx\n", 
-		 ((p->thread.regs)->nip), ((p->thread.regs)->msr)); 
-	  printf("            ctr    : 0x%16.16lx  link  : 0x%16.16lx\n", 
-		 ((p->thread.regs)->ctr), ((p->thread.regs)->link));
-	  printf("            xer    : 0x%16.16lx  ccr   : 0x%16.16lx\n", 
-		 ((p->thread.regs)->xer), ((p->thread.regs)->ccr)); 
-	  printf("            trap   : 0x%16.16lx\n", 
-		 ((p->thread.regs)->trap));
-	  printf("            dar    : 0x%16.16lx  dsis  : 0x%16.16lx\n", 
-		 ((p->thread.regs)->dar), ((p->thread.regs)->dsisr));
-	  printf("            rslt   : 0x%16.16lx  org3  : 0x%16.16lx\n", 
-		 ((p->thread.regs)->result), (p->thread.regs->orig_gpr3));
-	}
-
-	if(p->mm) {
-	  struct mm_struct *mm = p->mm; 
-	  printf("            mm     : 0x%16.16lx  pgd   : 0x%16.16lx\n", 
-		 mm, mm->pgd);
-	  printf("            context: 0x%16.16lx  mmap  : 0x%16.16lx\n", 
-		 mm->context, mm->mmap);
-	  
-	  printf("\n");
-	}
-
-}
-
-static void xmon_show_state(void)
-{
-	struct task_struct *p;
-
-#if (BITS_PER_LONG == 32)
-	printf("\n"
-	       "                         free                        sibling\n");
-	printf("task name   st PC              stack   pid father child younger older\n");
-#else
-	printf("\n"
-	       "                                 free                        sibling\n");
-	printf("  task                 PC        stack   pid father child younger older\n");
-#endif
-	read_lock(&tasklist_lock);
-	for_each_task(p)
-		show_task(p);
-	read_unlock(&tasklist_lock);
 }
 
 static void debug_trace(void) {

@@ -579,7 +579,9 @@ GLUE(GLUE(.LT,NAME),_procname_end):
 #define mfmsr()		({unsigned long rval; \
 			asm volatile("mfmsr %0" : "=r" (rval)); rval;})
 
-#define mtmsrd(v)	asm volatile("mtmsrd %0" : : "r" (v))
+#define __mtmsrd(v, l)	asm volatile("mtmsrd %0," __stringify(l) \
+				     : : "r" (v))
+#define mtmsrd(v)	__mtmsrd((v), 0)
 
 #define mfspr(rn)	({unsigned long rval; \
 			asm volatile("mfspr %0," __stringify(rn) \
@@ -663,7 +665,6 @@ struct thread_struct {
 	unsigned long	ksp;		/* Kernel stack pointer */
 	struct pt_regs	*regs;		/* Pointer to saved register state */
 	mm_segment_t	fs;		/* for get_fs() validation */
-	void		*pgdir;		/* root of page-table tree */
 	signed long     last_syscall;
 	double		fpr[32];	/* Complete floating point set */
 	unsigned long	fpscr_pad;	/* fpr ... fpscr must be contiguous */
@@ -676,7 +677,6 @@ struct thread_struct {
 	INIT_SP, /* ksp */ \
 	(struct pt_regs *)INIT_SP - 1, /* regs */ \
 	KERNEL_DS, /*fs*/ \
-	swapper_pg_dir, /* pgdir */ \
 	0, /* last_syscall */ \
 	{0}, 0, 0 \
 }
