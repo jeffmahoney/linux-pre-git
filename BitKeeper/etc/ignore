@@ -241,3 +241,14 @@ drivers/scsi/aic7xxx/aicasm/aicasm_macro_scan.c
 drivers/scsi/aic7xxx/aicasm/aicasm_scan.c
 drivers/scsi/aic7xxx/aicasm/aicdb.h
 fs/xfs/linux-2.6
+scripts/basic/docproc
+drivers/md/mktables
+drivers/md/raid6int1.c
+drivers/md/raid6int16.c
+drivers/md/raid6int2.c
+drivers/md/raid6int32.c
+drivers/md/raid6int4.c
+drivers/md/raid6int8.c
+drivers/md/raid6tables.c
+scripts/basic/fixdep
+scripts/basic/split-include
