@@ -582,6 +582,8 @@ subsys_initcall(pnpbios_init);
 
 static int __init pnpbios_thread_init(void)
 {
+	if (pnpbios_disabled)
+		return 0;
 #ifdef CONFIG_HOTPLUG
 	init_completion(&unload_sem);
 	if (kernel_thread(pnp_dock_thread, NULL, CLONE_KERNEL) > 0)
