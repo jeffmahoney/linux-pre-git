@@ -76,3 +76,4 @@ scripts/split-include
 scripts/tkparse
 scripts/docproc
 vmlinux
+include/linux/#mm.h#
