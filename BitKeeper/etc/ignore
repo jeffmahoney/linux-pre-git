@@ -34,6 +34,9 @@ include/linux/autoconf.h
 include/linux/compile.h
 include/linux/modversions.h
 include/linux/version.h
+scripts/kconfig.tk
 scripts/mkdep
 scripts/split-include
+scripts/tkparse
+scripts/lxdialog/lxdialog
 vmlinux
