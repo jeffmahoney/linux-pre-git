@@ -80,11 +80,9 @@ include/linux/version.h
 scripts/conmakehash
 scripts/docproc
 scripts/fixdep
-scripts/kconfig.tk
-scripts/lxdialog/lxdialog
-scripts/mkdep
 scripts/split-include
-scripts/tkparse
+scripts/kallsyms
+scripts/lxdialog/lxdialog
 scripts/kconfig/conf
 scripts/kconfig/lex.zconf.c
 scripts/kconfig/libkconfig.so
