@@ -118,10 +118,10 @@ scripts/mk_elfconfig
 scripts/mk_elfconfig.h
 scripts/mkdep
 scripts/modpost
+scripts/pnmtologo
 scripts/split-include
 scripts/tkparse
 usr/gen_init_cpio
 usr/initramfs_data.cpio
 usr/initramfs_data.cpio.gz
 vmlinux
-scripts/pnmtologo
