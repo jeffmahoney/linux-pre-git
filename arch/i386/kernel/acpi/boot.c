@@ -753,7 +753,7 @@ acpi_process_madt(void)
 	int count, error;
 
 	count = acpi_table_parse(ACPI_APIC, acpi_parse_madt);
-	if (count == 1) {
+	if (count >= 1) {
 
 		/*
 		 * Parse MADT LAPIC entries
@@ -827,6 +827,10 @@ acpi_boot_init (void)
 		disable_acpi();
 		return error;
 	}
+
+#ifdef __i386__
+	check_acpi_pci();
+#endif
 
 	acpi_table_parse(ACPI_BOOT, acpi_parse_sbf);
 
