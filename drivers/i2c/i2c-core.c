@@ -88,6 +88,16 @@ int i2c_add_adapter(struct i2c_adapter *adap)
 	init_MUTEX(&adap->bus);
 	init_MUTEX(&adap->list);
 
+	/* Add the adapter to the driver core.
+	 * If the parent pointer is not set up,
+	 * we add this adapter to the legacy bus.
+	 */
+	if (adap->dev.parent == NULL)
+		adap->dev.parent = &legacy_bus;
+	sprintf(adap->dev.bus_id, "i2c-%d", i);
+	strcpy(adap->dev.name, "i2c controller");
+	device_register(&adap->dev);
+
 	/* inform drivers of new adapters */
 	for (j=0;j<I2C_DRIVER_MAX;j++)
 		if (drivers[j]!=NULL && 
@@ -154,6 +164,9 @@ int i2c_del_adapter(struct i2c_adapter *adap)
 	}
 
 	i2cproc_remove(i);
+
+	/* clean up the sysfs representation */
+	device_unregister(&adap->dev);
 
 	adapters[i] = NULL;
 
@@ -611,10 +624,37 @@ static void __exit i2cproc_cleanup(void)
 {
 	remove_proc_entry("i2c",proc_bus);
 }
+#else
+static int __init i2cproc_init(void) { return 0; }
+static void __exit i2cproc_cleanup(void) { }
+#endif /* CONFIG_PROC_FS */
 
-module_init(i2cproc_init);
-module_exit(i2cproc_cleanup);
-#endif /* def CONFIG_PROC_FS */
+/* match always succeeds, as we want the probe() to tell if we really accept this match */
+static int i2c_device_match(struct device *dev, struct device_driver *drv)
+{
+	return 1;
+}
+
+struct bus_type i2c_bus_type = {
+	.name =		"i2c",
+	.match =	i2c_device_match,
+};
+
+
+static int __init i2c_init(void)
+{
+	bus_register(&i2c_bus_type);
+	return i2cproc_init();
+}
+
+static void __exit i2c_exit(void)
+{
+	i2cproc_cleanup();
+	bus_unregister(&i2c_bus_type);
+}
+
+module_init(i2c_init);
+module_exit(i2c_exit);
 
 /* ----------------------------------------------------
  * the functional interface to the i2c busses.
