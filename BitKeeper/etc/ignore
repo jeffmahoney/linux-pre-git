@@ -258,3 +258,7 @@ vmlinux
 arch/*/kernel/vmlinux.lds
 arch/i386/kernel/vsyscall.lds
 usr/initramfs_list
+drivers/md/raid6altivec1.c
+drivers/md/raid6altivec2.c
+drivers/md/raid6altivec4.c
+drivers/md/raid6altivec8.c
