@@ -92,5 +92,7 @@ scripts/kconfig/zconf.tab.c
 scripts/kconfig/zconf.tab.h
 usr/gen_init_cpio
 usr/initramfs_data.cpio.gz
+lib/crc32table.h
+lib/gen_crc32table
 vmlinux
 scripts/kconfig/mconf
