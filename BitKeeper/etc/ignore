@@ -74,4 +74,5 @@ scripts/lxdialog/lxdialog
 scripts/mkdep
 scripts/split-include
 scripts/tkparse
+scripts/docproc
 vmlinux
