@@ -5,7 +5,7 @@
 .config.old
 .depend
 .hdepend
-.tmp_export-objs
+.tmp*
 .version
 BitKeeper/*/*
 Desktop.ini
