@@ -445,7 +445,7 @@ config LASI_82596
 
 config MIPS_JAZZ_SONIC
 	tristate "MIPS JAZZ onboard SONIC Ethernet support"
-	depends on NET_ETHERNET && MIPS_JAZZ
+	depends on NET_ETHERNET && MACH_JAZZ
 	help
 	  This is the driver for the onboard card of MIPS Magnum 4000,
 	  Acer PICA, Olivetti M700-10 and a few other identical OEM systems.
@@ -470,7 +470,7 @@ config NET_SB1250_MAC
 
 config SGI_IOC3_ETH
 	bool "SGI IOC3 Ethernet"
-	depends on NET_ETHERNET && SGI_IP27
+	depends on NET_ETHERNET && PCI && SGI_IP27
 	select CRC32
 	select MII
 	help
@@ -1763,14 +1763,6 @@ config DECLANCE
 	  DEC (now Compaq) based on the AMD Lance chipset, including the
 	  DEPCA series.  (This chipset is better known via the NE2100 cards.)
 
-config BAGETLANCE
-	tristate "Baget AMD LANCE support"
-	depends on NET_ETHERNET && BAGET_MIPS
-	help
-	  Say Y to enable kernel support for AMD Lance Ethernet cards on the
-	  MIPS-32-based Baget embedded system.  This chipset is better known
-	  via the NE2100 cards.
-
 config 68360_ENET
 	bool "Motorola 68360 ethernet controller"
 	depends on M68360
@@ -2077,7 +2069,7 @@ config GFAR_NAPI
 
 config MV643XX_ETH
 	tristate "MV-643XX Ethernet support"
-	depends on MOMENCO_OCELOT_C || MOMENCO_JAGUAR_ATX
+	depends on MOMENCO_OCELOT_C || MOMENCO_JAGUAR_ATX || MOMENCO_OCELOT_3
 	help
 	  This driver supports the gigabit Ethernet on the Marvell MV643XX
 	  chipset which is used in the Momenco Ocelot C and Jaguar ATX.
