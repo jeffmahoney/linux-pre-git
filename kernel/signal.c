@@ -260,23 +260,6 @@ void __exit_sighand(struct task_struct *tsk)
 	if (!atomic_read(&sig->count))
 		BUG();
 	spin_lock(&sig->siglock);
-	/*
-	 * Do not let the thread group leader exit until all other
-	 * threads are done:
-	 */
-	while (!list_empty(&current->thread_group) &&
-			current->tgid == current->pid &&
-			atomic_read(&sig->count) > 1) {
-
-		spin_unlock(&sig->siglock);
-		write_unlock_irq(&tasklist_lock);
-
-		wait_for_completion(&sig->group_exit_done);
-
-		write_lock_irq(&tasklist_lock);
-		spin_lock(&sig->siglock);
-	}
-
 	spin_lock(&tsk->sigmask_lock);
 	tsk->sig = NULL;
 	if (atomic_dec_and_test(&sig->count)) {
@@ -285,10 +268,21 @@ void __exit_sighand(struct task_struct *tsk)
 		flush_sigqueue(&sig->shared_pending);
 		kmem_cache_free(sigact_cachep, sig);
 	} else {
-		if (!list_empty(&current->thread_group) &&
-					atomic_read(&sig->count) == 1)
-			complete(&sig->group_exit_done);
-		__remove_thread_group(tsk, sig);
+		struct task_struct *leader = tsk->group_leader;
+		/*
+		 * If we are the last non-leader member of the thread
+		 * group, and the leader is zombie, then notify the
+		 * group leader's parent process.
+		 *
+		 * (subtle: here we also rely on the fact that if we are the
+		 *  thread group leader then we are not zombied yet.)
+		 */
+		if (atomic_read(&sig->count) == 1 &&
+					leader->state == TASK_ZOMBIE) {
+			__remove_thread_group(tsk, sig);
+			do_notify_parent(leader, leader->exit_signal);
+		} else
+			__remove_thread_group(tsk, sig);
 		spin_unlock(&sig->siglock);
 	}
 	clear_tsk_thread_flag(tsk,TIF_SIGPENDING);
@@ -1105,6 +1099,8 @@ void do_notify_parent(struct task_struct *tsk, int sig)
 	struct siginfo info;
 	int why, status;
 
+	if (delay_group_leader(tsk))
+		return;
 	if (sig == -1)
 		BUG();
 
