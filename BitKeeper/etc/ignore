@@ -102,9 +102,11 @@ include/linux/modules/*
 include/linux/modversions.h
 include/linux/reiserfs_fs.h~
 include/linux/version.h
+kernel.spec
 lib/crc32table.h
 lib/gen_crc32table
 push-all
+scripts/bin2c
 scripts/conmakehash
 scripts/docproc
 scripts/elfconfig.h
@@ -122,6 +124,8 @@ scripts/kconfig/lex.zconf.c
 scripts/kconfig/libkconfig.so
 scripts/kconfig/lkc_defs.h
 scripts/kconfig/mconf
+scripts/kconfig/qconf
+scripts/kconfig/qconf.moc
 scripts/kconfig/zconf.tab.c
 scripts/kconfig/zconf.tab.h
 scripts/lxdialog/lxdialog
@@ -138,6 +142,3 @@ usr/initramfs_data.S
 usr/initramfs_data.cpio
 usr/initramfs_data.cpio.gz
 vmlinux
-scripts/bin2c
-scripts/kconfig/qconf
-scripts/kconfig/qconf.moc
