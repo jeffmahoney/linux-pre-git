@@ -1,5 +1,5 @@
 /*
- * BK Id: SCCS/s.start.c 1.8 07/25/01 18:13:07 trini
+ * BK Id: %F% %I% %G% %U% %#%
  */
 /*
  * Copyright (C) Paul Mackerras 1997.
