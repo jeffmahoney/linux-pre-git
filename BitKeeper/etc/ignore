@@ -131,3 +131,4 @@ include/asm-i386/asm_offsets.h
 push-all
 drivers/video/logo/logo_linux_clut224.c
 tags
+arch/i386/boot/mtools.conf
