@@ -1,5 +1,5 @@
 *.[oas]
-.*.flags
+.*.cmd
 .config
 .config.old
 .depend
