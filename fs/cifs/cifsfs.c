@@ -255,12 +255,14 @@ cifs_show_options(struct seq_file *s, struct vfsmount *m)
 	if (cifs_sb) {
 		if (cifs_sb->tcon) {
 			seq_printf(s, ",unc=%s", cifs_sb->tcon->treeName);
-			if ((cifs_sb->tcon->ses) && (cifs_sb->tcon->ses->userName))
-				seq_printf(s, ",username=%s",
+			if (cifs_sb->tcon->ses) {
+				if (cifs_sb->tcon->ses->userName)
+					seq_printf(s, ",username=%s",
 					   cifs_sb->tcon->ses->userName);
-			if(cifs_sb->tcon->ses->domainName)
-				seq_printf(s, ",domain=%s",
-					cifs_sb->tcon->ses->domainName);
+				if(cifs_sb->tcon->ses->domainName)
+					seq_printf(s, ",domain=%s",
+					   cifs_sb->tcon->ses->domainName);
+			}
 		}
 		seq_printf(s, ",rsize=%d",cifs_sb->rsize);
 		seq_printf(s, ",wsize=%d",cifs_sb->wsize);
@@ -756,11 +758,14 @@ init_cifs(void)
 			if (!rc) {
 				rc = register_filesystem(&cifs_fs_type);
 				if (!rc) {                
-					kernel_thread(cifs_oplock_thread, NULL, 
+					rc = (int)kernel_thread(cifs_oplock_thread, NULL, 
 						CLONE_FS | CLONE_FILES | CLONE_VM);
-					return rc; /* Success */
-				} else
-					cifs_destroy_request_bufs();
+					if(rc > 0)
+						return 0;
+					else 
+						cERROR(1,("error %d create oplock thread",rc));
+				}
+				cifs_destroy_request_bufs();
 			}
 			cifs_destroy_mids();
 		}
