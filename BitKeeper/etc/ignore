@@ -38,6 +38,7 @@ include/linux/autoconf.h
 include/linux/compile.h
 include/linux/modversions.h
 include/linux/version.h
+include/linux/modules/*
 scripts/kconfig.tk
 scripts/lxdialog/lxdialog
 scripts/mkdep
