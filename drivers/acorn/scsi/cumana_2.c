@@ -380,26 +380,6 @@ int cumanascsi_2_proc_info (char *buffer, char **start, off_t offset,
 
 	pos += sprintf(buffer+pos, "\nAttached devices:\n");
 
-	list_for_each_entry(scd, &host->my_devices, siblings) {
-		int len;
-
-		proc_print_scsidevice(scd, buffer, &len, pos);
-		pos += len;
-		pos += sprintf(buffer+pos, "Extensions: ");
-		if (scd->tagged_supported)
-			pos += sprintf(buffer+pos, "TAG %sabled [%d] ",
-				       scd->tagged_queue ? "en" : "dis",
-				       scd->current_tag);
-		pos += sprintf(buffer+pos, "\n");
-
-		if (pos + begin < offset) {
-			begin += pos;
-			pos = 0;
-		}
-		if (pos + begin > offset + length)
-			break;
-	}
-
 	*start = buffer + (offset - begin);
 	pos -= offset - begin;
 	if (pos > length)
@@ -572,7 +552,6 @@ static struct ecard_driver cumanascsi2_driver = {
 	.remove		= __devexit_p(cumanascsi2_remove),
 	.id_table	= cumanascsi2_cids,
 	.drv = {
-		.devclass	= &shost_devclass,
 		.name		= "cumanascsi2",
 	},
 };
