@@ -102,3 +102,4 @@ scripts/mk_elfconfig.h
 scripts/modpost
 drivers/ieee1394/oui.c
 scripts/elfconfig.h
+drivers/eisa/devlist.h
