@@ -49,6 +49,7 @@ SECTIONS
   __setup_end = .;
   __initcall_start = .;
   .initcall.init : {
+	*(.initcall.init)
 	*(.initcall1.init) 
 	*(.initcall2.init) 
 	*(.initcall3.init) 
@@ -72,18 +73,18 @@ SECTIONS
   __nosave_end = .;
 
   . = ALIGN(4096);
-  .data.page_aligned : { *(.data.idt) }
+  .data.page_aligned : {  *(.data.page_aligned) *(.data.idt) }
 
   . = ALIGN(32);
   .data.cacheline_aligned : { *(.data.cacheline_aligned) }
 
-  __bss_start = .;		/* BSS */
-  .bss : { *(.bss) }
-  __bss_stop = .; 
-
   __start___kallsyms = .;     /* All kernel symbols */
   __kallsyms : { *(__kallsyms) }
   __stop___kallsyms = .;
+
+  __bss_start = .;		/* BSS */
+  .bss : { *(.bss) }
+  __bss_stop = .; 
 
   _end = . ;
 
