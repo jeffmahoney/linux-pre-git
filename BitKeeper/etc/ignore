@@ -45,3 +45,4 @@ scripts/mkdep
 scripts/split-include
 scripts/tkparse
 vmlinux
+drivers/ide/.piix.c.swp
