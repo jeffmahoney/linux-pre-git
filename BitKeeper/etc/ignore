@@ -45,3 +45,9 @@ scripts/mkdep
 scripts/split-include
 scripts/tkparse
 vmlinux
+arch/ia64/kernel/#unwind.c#
+arch/ia64/lib/copy_page_mck.S~
+arch/ia64/hp/Config.in~
+arch/ia64/kernel/#entry.S#
+include/asm-ia64/cacheflush.h~
+include/asm-ia64/tlbflush.h~
