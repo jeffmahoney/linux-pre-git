@@ -50,7 +50,7 @@ int cifsFYI = 0;
 int cifsERROR = 1;
 int traceSMB = 0;
 unsigned int oplockEnabled = 1;
-unsigned int quotaEnabled = 0;
+unsigned int experimEnabled = 0;
 unsigned int linuxExtEnabled = 1;
 unsigned int lookupCacheEnabled = 1;
 unsigned int multiuser_mount = 0;
@@ -207,6 +207,8 @@ static kmem_cache_t *cifs_inode_cachep;
 static kmem_cache_t *cifs_req_cachep;
 static kmem_cache_t *cifs_mid_cachep;
 kmem_cache_t *cifs_oplock_cachep;
+static kmem_cache_t *cifs_sm_req_cachep;
+mempool_t *cifs_sm_req_poolp;
 mempool_t *cifs_req_poolp;
 mempool_t *cifs_mid_poolp;
 
@@ -431,6 +433,20 @@ cifs_read_wrapper(struct file * file, char __user *read_data, size_t read_size,
 		return -EIO;
 
 	cFYI(1,("In read_wrapper size %zd at %lld",read_size,*poffset));
+
+#ifdef CONFIG_CIFS_EXPERIMENTAL    /* BB fixme - fix user char * to kernel char * mapping here BB */
+	/* check whether we can cache writes locally */
+	if(file->f_dentry->d_sb) {
+		struct cifs_sb_info *cifs_sb;
+		cifs_sb = CIFS_SB(file->f_dentry->d_sb);
+		if(cifs_sb != NULL) {
+			if(cifs_sb->mnt_cifs_flags & CIFS_MOUNT_DIRECT_IO)
+				return cifs_read(file,read_data,
+							read_size,poffset);
+		}
+	}
+#endif /* CIFS_EXPERIMENTAL */
+
 	if(CIFS_I(file->f_dentry->d_inode)->clientCanCacheRead) {
 		return generic_file_read(file,read_data,read_size,poffset);
 	} else {
@@ -463,7 +479,19 @@ cifs_write_wrapper(struct file * file, const char __user *write_data,
 
 	cFYI(1,("In write_wrapper size %zd at %lld",write_size,*poffset));
 
+#ifdef CONFIG_CIFS_EXPERIMENTAL    /* BB fixme - fix user char * to kernel char * mapping here BB */
 	/* check whether we can cache writes locally */
+	if(file->f_dentry->d_sb) {
+		struct cifs_sb_info *cifs_sb;
+		cifs_sb = CIFS_SB(file->f_dentry->d_sb);
+		if(cifs_sb != NULL) {
+			if(cifs_sb->mnt_cifs_flags & CIFS_MOUNT_DIRECT_IO) {
+				return cifs_write(file,write_data,
+							write_size,poffset);
+			}
+		}
+	}
+#endif /* CIFS_EXPERIMENTAL */
 	written = generic_file_write(file,write_data,write_size,poffset);
 	if(!CIFS_I(file->f_dentry->d_inode)->clientCanCacheAll)  {
 		if(file->f_dentry->d_inode->i_mapping) {
@@ -495,6 +523,12 @@ struct inode_operations cifs_dir_inode_ops = {
 	.setattr = cifs_setattr,
 	.symlink = cifs_symlink,
 	.mknod   = cifs_mknod,
+#ifdef CONFIG_CIFS_XATTR
+	.setxattr = cifs_setxattr,
+	.getxattr = cifs_getxattr,
+	.listxattr = cifs_listxattr,
+	.removexattr = cifs_removexattr,
+#endif
 };
 
 struct inode_operations cifs_file_inode_ops = {
@@ -537,14 +571,18 @@ struct file_operations cifs_file_ops = {
 	.flush = cifs_flush,
 	.mmap  = cifs_file_mmap,
 	.sendfile = generic_file_sendfile,
+#ifdef CONFIG_CIFS_EXPERIMENTAL
 	.dir_notify = cifs_dir_notify,
+#endif /* CONFIG_CIFS_EXPERIMENTAL */
 };
 
 struct file_operations cifs_dir_ops = {
 	.readdir = cifs_readdir,
 	.release = cifs_closedir,
 	.read    = generic_read_dir,
+#ifdef CONFIG_CIFS_EXPERIMENTAL
 	.dir_notify = cifs_dir_notify,
+#endif /* CONFIG_CIFS_EXPERIMENTAL */
 };
 
 static void
@@ -598,6 +636,33 @@ cifs_init_request_bufs(void)
 		kmem_cache_destroy(cifs_req_cachep);
 		return -ENOMEM;
 	}
+	/* 256 (MAX_CIFS_HDR_SIZE bytes is enough for most SMB responses and
+	almost all handle based requests (but not write response, nor is it
+	sufficient for path based requests).  A smaller size would have
+	been more efficient (compacting multiple slab items on one 4k page) 
+	for the case in which debug was on, but this larger size allows
+	more SMBs to use small buffer alloc and is still much more
+	efficient to alloc 1 per page off the slab compared to 17K (5page) 
+	alloc of large cifs buffers even when page debugging is on */
+	cifs_sm_req_cachep = kmem_cache_create("cifs_small_rq",
+			MAX_CIFS_HDR_SIZE, 0, SLAB_HWCACHE_ALIGN, NULL, NULL);
+	if (cifs_sm_req_cachep == NULL) {
+		mempool_destroy(cifs_req_poolp);
+		kmem_cache_destroy(cifs_req_cachep);
+		return -ENOMEM;              
+	}
+
+	cifs_sm_req_poolp = mempool_create(30,
+				mempool_alloc_slab,
+				mempool_free_slab,
+				cifs_sm_req_cachep);
+
+	if(cifs_sm_req_poolp == NULL) {
+		mempool_destroy(cifs_req_poolp);
+		kmem_cache_destroy(cifs_req_cachep);
+		kmem_cache_destroy(cifs_sm_req_cachep);
+		return -ENOMEM;
+	}
 
 	return 0;
 }
@@ -609,6 +674,10 @@ cifs_destroy_request_bufs(void)
 	if (kmem_cache_destroy(cifs_req_cachep))
 		printk(KERN_WARNING
 		       "cifs_destroy_request_cache: error not all structures were freed\n");
+	mempool_destroy(cifs_sm_req_poolp);
+	if (kmem_cache_destroy(cifs_sm_req_cachep))
+		printk(KERN_WARNING
+		      "cifs_destroy_request_cache: cifs_small_rq free error\n");
 }
 
 static int
