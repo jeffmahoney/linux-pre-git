@@ -245,7 +245,7 @@ static inline void do_timer_interrupt(int irq, void *dev_id, struct pt_regs *reg
  * Time Stamp Counter value at the time of the timer interrupt, so that
  * we later on can estimate the time of day more exactly.
  */
-void timer_interrupt(int irq, void *dev_id, struct pt_regs *regs)
+irqreturn_t timer_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 {
 	/*
 	 * Here we are in the timer irq handler. We just have irqs locally
@@ -261,7 +261,7 @@ void timer_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 	do_timer_interrupt(irq, NULL, regs);
 
 	write_sequnlock(&xtime_lock);
-
+	return IRQ_HANDLED;
 }
 
 /* not static: needed by APM */
